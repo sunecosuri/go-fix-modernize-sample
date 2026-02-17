@@ -43,8 +43,10 @@ git diff
 | 16 | **stringscutprefix** | `rule_stringscutprefix.go` | `HasPrefix` + `TrimPrefix` | `strings.CutPrefix()` / `CutSuffix()` | Go 1.20 |
 | 17 | **stringsseq** | `rule_stringsseq.go` | `strings.Split` でイテレーション | `strings.SplitSeq`（イテレータ） | Go 1.22 |
 | 18 | **testingcontext** | `rule_testingcontext_test.go` | `context.WithCancel(context.Background())` + `defer cancel()` | `t.Context()` | Go 1.20 |
-| 19 | **unsafefuncs** | `rule_unsafefuncs.go` | `unsafe.Pointer(uintptr(ptr) + uintptr(n))` | `unsafe.Add(ptr, n)` | Go 1.21 |
+| 19 | **unsafefuncs** ⚠️ | `rule_unsafefuncs.go` | `unsafe.Pointer(uintptr(ptr) + uintptr(n))` | `unsafe.Add(ptr, n)` | Go 1.17 |
 | 20 | **waitgroup** | `rule_waitgroup.go` | `wg.Add(1)` + `go func() { defer wg.Done() }` | `wg.Go(func() { ... })` | Go 1.22 |
+
+> ⚠️ **unsafefuncs** は `golang.org/x/tools` の modernize パッケージに定義されていますが、Go 1.26 の `go tool fix` にバンドルされた `modernize.Suite` には含まれていません。`go fix ./...` では適用されません。
 
 ## 各ルールの詳細
 
@@ -291,6 +293,13 @@ ctx := t.Context()
 ```
 
 ### 19. unsafefuncs
+
+> **注意:** このルールは Go 1.26 の `go tool fix` にバンドルされた `modernize.Suite` に含まれていないため、`go fix ./...` では適用されません。
+> `golang.org/x/tools` の最新版を直接実行すれば適用可能です。
+>
+> ```bash
+> go run golang.org/x/tools/go/analysis/passes/modernize/cmd/modernize@latest -fix ./...
+> ```
 
 冗長な unsafe ポインタ演算を `unsafe.Add` に置換します。
 
